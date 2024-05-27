@@ -1,32 +1,57 @@
-from selenium import webdriver
-import pyautogui as pag
-import time
+# Libraries
 
+import time
+import numpy as np
+
+
+# Selenium imports
+from selenium import webdriver
 from selenium.webdriver.common.keys import Keys 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 
+# PyAutoGUI imports
+import pyautogui as pag
+
+# Image processing imports
 from PIL import ImageGrab
 import cv2
 from fer import FER
 
-#import pygetwindow as gw
-import subprocess
-import numpy as np
+# GUI
+import tkinter as tk
+from tkinter import simpledialog
+
+
+# Asking for URL & password
+def get_meeting_details():
+    root = tk.Tk()
+    root.withdraw()  # Hide the root window
+
+    meeting_url = simpledialog.askstring("Meeting URL", "Enter the Zoom meeting URL:")
+    meeting_passcode = simpledialog.askstring("Meeting Passcode", "Enter the Zoom meeting passcode (if any):")
+
+    root.destroy()
+    return meeting_url, meeting_passcode
+
+URL , passcode = get_meeting_details()
 
 # Ask user for URL:
-URL = str(input("Ingrese link de zoom meeting:"))
+#URL = str(input("Ingrese link de zoom meeting:"))
 
 
-# Initialize WebDriver
+################################ Initialize WebDriver ################################
 driver = webdriver.Chrome()
 driver.maximize_window()
 
 driver.get(URL)
 
 print("Driver initialized...")
+
+
+# ACTIONS:
 
 #FIRST ACTION: press enter key
 print("Opening zoom site:...")
@@ -86,14 +111,12 @@ pag.press('esc')
 time.sleep(2)
 pag.press('esc')
 
-# Gallery view
+#NINETH ACTION: Swtich to Gallery view
 print('Opening Gallery view..\n')  
-
 time.sleep(2)
 
 # Move the mouse to the top of the screen to make the controls visible
 actions = ActionChains(driver)
-
 actions.move_by_offset(10, 10).perform()
 
 # Wait until the "View" button is visible and clickable
@@ -111,10 +134,14 @@ actions.send_keys(Keys.ENTER).perform()
 print("Gallery view active.\n")
 
 
-# Emotions functions
+
+################################ Emotions functions ################################
+
 print("Bot is ready to detect emotions...\n")
 
 detector = FER(mtcnn=True)
+
+print("\n Tensorflow loaded...\n")
 
 def analyze_emotions(image):
     # Detect emotions
@@ -153,82 +180,45 @@ def capture_screen():
 
 ################################ Exploring different ways to display the strongest emotion on screen ################################
 
-# Display using old fashioned alert button
-def display_strongest_emotion(emotion):
-    # Activate the Zoom window using xdotool
-    subprocess.run(["xdotool", "search", "--name", "Zoom", "windowactivate"])
-    
-    # Display the emotion on the screen using pyautogui
-    pag.alert(f'The strongest emotion detected is: {emotion}')
-    time.sleep(3)
-    pag.press('enter')
+def get_traffic_light_color(emotion):
+    positive_emotions = ['happy', 'surprise']
+    neutral_emotions = ['neutral']
+    #negative_emotions = ['sad', 'angry', 'disgust', 'fear']
 
-# Display screenshots - not good for real-time.
-def display_strongest_emotion_overlay(emotion):
-    # Capture the screen
+    if emotion in positive_emotions:
+        return 'Green'
+    elif emotion in neutral_emotions:
+        return 'Yellow'
+    else:
+        return 'Red'
+
+def update_status_label(emotion, num_faces):
+    if emotion:
+        traffic_light_color = get_traffic_light_color(emotion)
+        status_label.config(text=f'Strongest Emotion: {emotion}\nNumber of Faces: {num_faces}', bg=traffic_light_color)
+    else:
+        status_label.config(text='No faces detected', bg='Gray')
+
+def analyze_and_update():
     screen = capture_screen()
-    
-    # Convert image to BGR format
-    screen_bgr = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
-    
-    # Add the strongest emotion text to the image
-    cv2.putText(screen_bgr, f'Strongest Emotion: {emotion}', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
-    
-    # Display the image in a window
-    cv2.imshow('Zoom Emotion Detection', screen_bgr)
-    
-    # Wait for 1 second to display the image, then close the window
-    cv2.waitKey(1000)
-    
-# Display using pyautogui - writes the text on the screen, not good.    
-def display_strongest_emotion_pyautogui(emotion):
-    # Clear any previous text overlays
-    pag.press('esc')
-    
-    # Overlay the text on the screen
-    pag.moveTo(100, 100)
-    pag.click()
-    pag.write(f'Strongest Emotion: {emotion}', interval=0.1)
+    emotions = analyze_emotions(screen)
+    num_faces = len(emotions)
+    strongest_emotion = get_strongest_emotion(emotions)
+    update_status_label(strongest_emotion, num_faces)
+    root.after(10000, analyze_and_update)  # Schedule the next update in 10 seconds
 
-def display_strongest_emotion_terminal(emotion, num_faces):
-    print(f'Strongest Emotion: {emotion}')
-    print(f'Number of Faces: {num_faces}')
+# Setup tkinter GUI
+root = tk.Tk()
+root.title("Zoom Emotion Detection")
+root.geometry("300x100")
+root.attributes("-topmost", True)  # Keep the window on top
 
-'''
-def display_strongest_emotion(emotion):
-    # Get the Zoom window
-    zoom_window = gw.getWindowsWithTitle('Zoom')[0]
-    zoom_window.activate()
-    
-    # Display the emotion on the screen using pyautogui
-    pyautogui.alert(f'The strongest emotion detected is: {emotion}')
-'''
+status_label = tk.Label(root, text="Initializing...", font=("Helvetica", 14))
+status_label.pack(expand=True, fill='both')
 
-# Working loop
-# Keep the script running to maintain the bot in the meeting
-try:
-    while True:
-        # Take a screenshot
-        screen = capture_screen()
-        
-        # Analyze the emotions in the screenshot
-        emotions = analyze_emotions(screen)
-        num_faces = len(emotions)
-        # Determine the strongest emotion
-        strongest_emotion = get_strongest_emotion(emotions)
-        
-        # Display the strongest emotion
-        display_strongest_emotion_terminal(strongest_emotion)
-        
-        
-        # Wait for 5 seconds before taking the next screenshot
-        time.sleep(5)
-        
-except KeyboardInterrupt:
-    print("Bot hard stopped")
-    driver.quit()
-    
+root.after(10000, analyze_and_update)  # Schedule the first update in 10 seconds
+root.mainloop()
 
-
-
+# Clean up
+driver.quit()
 
