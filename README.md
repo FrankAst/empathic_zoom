@@ -1,5 +1,5 @@
-# empathic_zoom
-
+# Empathic zoom
+This is a companion for zoom calls that will help identify in near-real time how the audience feels. With this tool, users can quickly adapt their presentation style based on the emotions of the viewers. By monitoring the facial expressions and emotions of the participants, the bot provides valuable insights that can be used to gauge the audience's engagement and adjust the delivery accordingly.
 ## Nedeed libraries
 * FER: Version used 22.5.1 - Facial Emotion Recognition library.
 * Tensorflow: Version 2.8.0 (FER compatibility)
