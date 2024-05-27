@@ -8,13 +8,22 @@ This is a companion for zoom calls that will help identify in near-real time how
 * PIL: Python Imaging Library - Provides image processing capabilities in Python.
 * Numpy: Fundamental package for scientific computing in Python.
 * cv2: Version 4.9.0 - OpenCV library used to capture the screenshots during the call. 
+* Tkinter: Version 8.6.12 - Standard Python interface to the Tk GUI toolkit.
 
+Other requirements:
+
+* Chromedriver: should match your chrome browser version.
+
+
+Recommendation: running a venv to install the required libraries.
 
 ## Functioning
 Once you start your zoom call, make sure to run the bot and give it the right link and password. Afterthat, just make sure the bot successfully joins the call and pay attention to the signallying:
 
-* Red light:
-* Yellow light:
-* Green light: 
+* Red light: ['sad', 'angry', 'disgust', 'fear']
+* Yellow light: ['neutral']
+* Green light: ['happy', 'surprise']
 
 On top of the colour signal, you will also see what was the strongest emotion across the participants on each revision.
+
+
