@@ -149,6 +149,19 @@ def analyze_emotions(image):
     print(emotions)
     return emotions
 
+
+def get_emotion_counters(emotions):
+    # Reset emotion counters
+    emotion_counters = {emotion: 0 for emotion in ['happy', 'surprise', 'neutral', 'sad', 'angry', 'disgust', 'fear']}
+    
+    # Update counters based on current screenshot
+    for emotion in emotions:
+        strongest_emotion = max(emotion['emotions'], key=emotion['emotions'].get)
+        emotion_counters[strongest_emotion] += 1
+    
+    return emotion_counters
+
+
 def get_strongest_emotion(emotions):
     if not emotions:
         return None
@@ -192,29 +205,39 @@ def get_traffic_light_color(emotion):
     else:
         return 'Red'
 
-def update_status_label(emotion, num_faces):
+def update_status_label(emotion, num_faces, emotion_counters):
     if emotion:
         traffic_light_color = get_traffic_light_color(emotion)
         status_label.config(text=f'Strongest Emotion: {emotion}\nNumber of Faces: {num_faces}', bg=traffic_light_color)
     else:
         status_label.config(text='No faces detected', bg='Gray')
+    
+    # Update the emotion counters label
+    counters_text = '\n'.join([f'{key}: {value}' for key, value in emotion_counters.items()])
+    counters_label.config(text=counters_text)
+
 
 def analyze_and_update():
     screen = capture_screen()
     emotions = analyze_emotions(screen)
     num_faces = len(emotions)
+    emotion_counters = get_emotion_counters(emotions)
     strongest_emotion = get_strongest_emotion(emotions)
-    update_status_label(strongest_emotion, num_faces)
-    root.after(10000, analyze_and_update)  # Schedule the next update in 10 seconds
-
+    update_status_label(strongest_emotion, num_faces, emotion_counters)
+    root.after(10000, analyze_and_update) # Schedule the next update in 10 seconds
+    
+    
 # Setup tkinter GUI
 root = tk.Tk()
 root.title("Zoom Emotion Detection")
-root.geometry("300x100")
+root.geometry("300x200")
 root.attributes("-topmost", True)  # Keep the window on top
 
 status_label = tk.Label(root, text="Initializing...", font=("Helvetica", 14))
 status_label.pack(expand=True, fill='both')
+
+counters_label = tk.Label(root, text="", font=("Helvetica", 12))
+counters_label.pack(expand=True, fill='both')
 
 root.after(10000, analyze_and_update)  # Schedule the first update in 10 seconds
 root.mainloop()
