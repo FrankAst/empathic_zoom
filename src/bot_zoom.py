@@ -191,7 +191,7 @@ def capture_screen():
 
 
 
-################################ Exploring different ways to display the strongest emotion on screen ################################
+################################ Creating GUI ################################
 
 def get_traffic_light_color(emotion):
     positive_emotions = ['happy', 'surprise']
