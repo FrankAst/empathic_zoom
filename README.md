@@ -1,4 +1,4 @@
-# Zoom Empático
+# Zoom Empático 
 Asistente para reuniones de Zoom que ayudará a identificar en 'casi' tiempo real cómo se siente la audiencia. Con esta herramienta, los usuarios pueden adaptar rápidamente su estilo de presentación según las emociones de los espectadores. Al monitorear las expresiones faciales y las reacciones de los participantes, el bot proporciona valiosos insights que pueden usarse para medir el compromiso de la audiencia y ajustar las didácticas en consecuencia.
 
 ## Bibliotecas necesarias
@@ -26,7 +26,7 @@ Una vez que se inicia la llamada de Zoom, asegúrate de ejecutar el bot y propor
 Además de la señal de color, también verás cuál fue la emoción más fuerte entre los participantes en cada revisión.
 En caso de estar realizando una presentación, ajustar la ventana del browser (en la que opera el bot) manualmente para maximizar el espacio de videos.
 
-
+******************************************************************************************************************************************************************
 
 
 # Empathic zoom
